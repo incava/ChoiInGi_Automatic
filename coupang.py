@@ -1,4 +1,5 @@
 import sys
+import threading
 import time
 import subprocess
 from selenium import webdriver
@@ -13,7 +14,7 @@ import pandas as pd
 
 class Pasing:
     # 필터값을 설정 하기 위해 생성자를 받도록함.
-    def __init__(self, url, search_name, min_price=0, max_price=sys.maxsize, contain_names=None):
+    def __init__(self, url, search_name, min_price=0, max_price=None, contain_names=None):
         if contain_names is None:
             contain_names = []
         self.contain_names = contain_names
@@ -35,9 +36,7 @@ class Pasing:
         self.nameAry.clear()
         self.priceAry.clear()
 
-    def set_instance(self, url, search_name, min_price=0, max_price=sys.maxsize, contain_names=None):
-        if contain_names is None:
-            contain_names = []
+    def set_instance(self, url, search_name, min_price, max_price, contain_names):
         self.contain_names = contain_names
         self.url = url
         self.search_name = search_name
@@ -47,8 +46,6 @@ class Pasing:
     def filter_price(self, price):
         # 범위값 안에 드는지 확인 후 리턴.
         price = int(price.replace(",", ""))
-        # print(f"price : {price}")
-        #print(f"filter_price : {self.min_price <= price >= self.max_price}")
         return self.min_price <= price <= self.max_price
 
     def filter_names(self, name):
@@ -64,9 +61,6 @@ class Pasing:
         # print(f"filter_names: {name_check()}")
         return name_check()
         # 필더가 있다면 확인
-
-
-
 
     def auto_start(self):
         self.ary_clear()
@@ -110,7 +104,9 @@ class Pasing:
                 print(f"Exception :{e}")
                 self.driver.quit()
                 break
-            data = {"product": self.nameAry, "price": self.priceAry}  # 딕셔너리로 저장
-            df = pd.DataFrame(data)
-            df.to_csv("test.csv", encoding="utf-8-sig")  # csv로 저장.
-            self.driver.quit()
+        data = {"product": self.nameAry, "price": self.priceAry}  # 딕셔너리로 저장
+        df = pd.DataFrame(data)
+        df.to_csv("test.csv", encoding="utf-8-sig")  # csv로 저장.
+        self.driver.quit()
+
+
