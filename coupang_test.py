@@ -11,7 +11,7 @@ class Macro:
         self.min_price = 0
         self.max_price = 0
         self.filter_array = []
-        self.auto = Pasing(self.url, self.search_name, self.min_price, self.max_price, self.filter_array)
+        self.auto = Pasing()
 
     def swap_min_max_num(self):
         if self.min_price > self.max_price:
@@ -26,14 +26,16 @@ class Macro:
         self.filter_array = entry_filter.get() if entry_filter.get() else ""
         self.filter_array = self.filter_array.split(",")
         self.swap_min_max_num()
-        self.auto.set_member(self.url, self.search_name, self.min_price, self.max_price, self.filter_array)
         #  매크로 실행
-        result = self.auto.auto_start()
+        result = self.auto.auto_start(self.url, self.search_name, self.min_price, self.max_price, self.filter_array)
         # 매크로 실행 결과 출력
         print(result)
         if result == 'success':
             result = self.save_to_csv()
         print(result)
+
+    def thread_control(self, value):
+        self.auto.thread = value
 
     def save_to_csv(self):
         return self.auto.ary_to_csv()
@@ -61,7 +63,7 @@ button = tk.Button(window, anchor="center", text="자동화 시작", command=cou
                    repeatdelay=1000)
 button.place(x=550, y=330)
 
-button = tk.Button(window, anchor="center", text="자동화 종료", command=lambda: macro.auto.thread_control(True),
+button = tk.Button(window, anchor="center", text="자동화 종료", command=lambda: macro.thread_control(True),
                    overrelief="solid",
                    repeatdelay=1000)
 button.place(x=450, y=330)
