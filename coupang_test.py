@@ -1,17 +1,78 @@
 import sys
+import time
 import tkinter as tk
+from tkinter import scrolledtext
 from coupang import Pasing
 import threading
 
 
-class Macro:
+class WindowUI(tk.Tk):
     def __init__(self):
+        tk.Tk.__init__(self)
         self.url = ""
         self.search_name = ""
         self.min_price = 0
         self.max_price = 0
         self.filter_array = []
         self.auto = Pasing()
+        self.title("auto_Search")
+        self.geometry("640x360+100+100")
+        self.resizable(False, False)
+        #############################################
+        # label_frame
+        self.labelframe_progress = tk.LabelFrame(self, text='진행창', relief='solid', bd=1)
+        self.labelframe_progress.pack()
+        self.labelframe_progress.place(x=5, y=10, width=320, height=350)
+
+        #############################################
+
+        # button
+        self.button_start = tk.Button(self, anchor="center", text="자동화 시작", command=self.coupang_run,
+                                      overrelief="solid", repeatdelay=1000)
+        self.button_start.place(x=550, y=330)
+        self.button_exit = tk.Button(self, anchor="center", text="자동화 종료", command=lambda: self.thread_control(True),
+                                     overrelief="solid", repeatdelay=1000)
+        self.button_exit.place(x=450, y=330)
+        #############################################
+        # label
+        self.label_progress_info = scrolledtext.ScrolledText(self.labelframe_progress)
+        # self.label_progress_info.configure(state='disabled')
+        self.label_progress_info.pack()
+
+        self.label_url = tk.Label(self, text="가격 필터")
+        self.label_url.place(x=350, y=190)
+
+        self.label_url = tk.Label(self, text="filter ','로 구분")
+        self.label_url.place(x=350, y=220)
+
+        self.label_url = tk.Label(self, text="url입력창")
+        self.label_url.place(x=350, y=250)
+
+        self.label_name = tk.Label(self, text="검색입력")
+        self.label_name.place(x=350, y=280)
+
+        self.label_name = tk.Label(self, text="~", font=("궁서체", 20))
+        self.label_name.place(x=510, y=183)
+
+        #############################################
+        # entry
+        self.entry_min_price = tk.Entry(self, width=9)
+        self.entry_min_price.place(x=440, y=190)
+
+        self.entry_max_price = tk.Entry(self, width=11)
+        self.entry_max_price.place(x=530, y=190)
+
+        self.entry_filter = tk.Entry(self)
+        self.entry_filter.place(x=450, y=220)
+
+        self.entry_url = tk.Entry(self)
+        self.entry_url.place(x=450, y=250)
+
+        self.entry_name = tk.Entry(self)
+        self.entry_name.place(x=450, y=280)
+
+        #############################################
+        # scrollbar
 
     def swap_min_max_num(self):
         if self.min_price > self.max_price:
@@ -19,11 +80,13 @@ class Macro:
 
     def auto_method(self):
         # 값을 불러와 저장.
-        self.url = entry_url.get() if entry_url.get() else "https://www.coupang.com"
-        self.search_name = entry_name.get() if entry_name.get() else "아이"
-        self.min_price = int(entry_min_price.get() if entry_min_price.get() else 0)
-        self.max_price = int(entry_max_price.get() if entry_max_price.get() else sys.maxsize)
-        self.filter_array = entry_filter.get() if entry_filter.get() else ""
+        self.label_progress_info.delete('1.0', 'end')
+        self.label_progress_info.insert('current', "자동화 시작...")
+        self.url = self.entry_url.get() if self.entry_url.get() else "https://www.coupang.com"
+        self.search_name = self.entry_name.get() if self.entry_name.get() else "아이"
+        self.min_price = int(self.entry_min_price.get() if self.entry_min_price.get() else 0)
+        self.max_price = int(self.entry_max_price.get() if self.entry_max_price.get() else sys.maxsize)
+        self.filter_array = self.entry_filter.get() if self.entry_filter.get() else ""
         self.filter_array = self.filter_array.split(",")
         self.swap_min_max_num()
         #  매크로 실행
@@ -40,62 +103,27 @@ class Macro:
     def save_to_csv(self):
         return self.auto.ary_to_csv()
 
+    def coupang_run(self):
+        # target에 auto.start()를하면 리턴값을 타겟에 지정하는 것이므로 주의 ()사용은 알고 쓰자.
+        thread = threading.Thread(target=self.auto_method)
+        thread.daemon = True
+        thread.start()
 
-def coupang_run():
-    # target에 auto.start()를하면 리턴값을 타겟에 지정하는 것이므로 주의 ()사용은 알고 쓰자.
-    thread = threading.Thread(target=macro.auto_method)
-    thread.daemon = True
-    thread.start()
+        def thread_alive_check():
+            while thread.is_alive():
+                self.window_update()
+                time.sleep(0.25)
+
+        thread2 = threading.Thread(target=thread_alive_check)
+        thread2.daemon = True
+        thread2.start()
+
+    def window_update(self):
+        temp = self.auto.__progress_info__
+        self.auto.__progress_info__ = ''
+        self.label_progress_info.insert(index='end', chars=temp)
+        self.label_progress_info.see('end')
 
 
-# 매크로 클래스 생성
-macro = Macro()
-
-window = tk.Tk()
-window.title("auto_Search")
-window.geometry("640x360+100+100")
-window.resizable(False, False)
-text_label = tk.LabelFrame(window, text='진행창', relief='solid', bd=1, pady=10)
-text_label.pack()
-text_label.place(x=5, y=10, width=320, height=350)
-
-button = tk.Button(window, anchor="center", text="자동화 시작", command=coupang_run, overrelief="solid",
-                   repeatdelay=1000)
-button.place(x=550, y=330)
-
-button = tk.Button(window, anchor="center", text="자동화 종료", command=lambda: macro.thread_control(True),
-                   overrelief="solid",
-                   repeatdelay=1000)
-button.place(x=450, y=330)
-
-label_url = tk.Label(window, text="가격 필터")
-label_url.place(x=350, y=190)
-
-label_url = tk.Label(window, text="filter ','로 구분")
-label_url.place(x=350, y=220)
-
-label_url = tk.Label(window, text="url입력창")
-label_url.place(x=350, y=250)
-
-label_name = tk.Label(window, text="검색입력")
-label_name.place(x=350, y=280)
-
-label_name = tk.Label(window, text="~", font=("궁서체", 20))
-label_name.place(x=510, y=183)
-
-entry_min_price = tk.Entry(window, width=9)
-entry_min_price.place(x=440, y=190)
-
-entry_max_price = tk.Entry(window, width=11)
-entry_max_price.place(x=530, y=190)
-
-entry_filter = tk.Entry(window)
-entry_filter.place(x=450, y=220)
-
-entry_url = tk.Entry(window)
-entry_url.place(x=450, y=250)
-
-entry_name = tk.Entry(window)
-entry_name.place(x=450, y=280)
-
+window = WindowUI()
 window.mainloop()

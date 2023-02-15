@@ -15,13 +15,14 @@ class Pasing:
         self.__name_array = []  # 상품 이름 리스트
         self.__price_array = []  # 상품 가격 리스트
         self.__thread = False
+        self.__progress_info__ = "반갑습니다."
 
     @property
     def thread(self):
         return self.__thread
 
     @thread.setter
-    def thread(self, value):
+    def thread(self, value: bool):
         self.__thread = value
 
     @property
@@ -58,6 +59,9 @@ class Pasing:
     def ary_clear(self):
         self.name_array.clear()
         self.price_array.clear()
+
+    def progress_clear(self):
+        self.__progress_info__ = ""
 
     @staticmethod
     def filter_price(price, min_price, max_price):
@@ -98,8 +102,9 @@ class Pasing:
             datas = driver.find_elements(By.CSS_SELECTOR, ".search-product")
             cnt = 0
             for item in datas:
-                if self.thread:  # 사용자가 원하는 종료
+                if self.__thread:  # 사용자가 원하는 종료
                     driver.quit()
+                    self.__thread = False
                     return 'exit'
                 try:  # 예외 처리 구문으로
                     name = item.find_element(By.XPATH, "a/dl/dd/div/div[2]").text
@@ -108,7 +113,9 @@ class Pasing:
                     if self.filter_names(name, filter_array) and self.filter_price(price, min_price, max_price):
                         self.name_array.append(name)
                         self.price_array.append(price)
-                        print(name)
+                        self.__progress_info__ += name + '\n'
+                        self.__progress_info__ += price + '\n'
+                        print(self.__progress_info__)
                         print(price)
                 except NoSuchElementException as e:  # 만약 name, price가 엘리멘트가 없을 경우,
                     print(f"NoSuchElementError : {e}")
