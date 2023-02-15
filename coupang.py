@@ -54,6 +54,7 @@ class Pasing:
         option.add_experimental_option("excludeSwitches", ["enable-automation"])
         # 크롬 자동 드라이버 설치 및 버전 맞춤.
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=option)
+        driver.minimize_window()
         return driver
 
     def ary_clear(self):
@@ -88,7 +89,7 @@ class Pasing:
     def auto_start(self, url, search_name, min_price, max_price, filter_array):
         # 예기치 못한 상황이라면 error+msg, 성공적이면 success, 실패라면 fail, 종료를 원했다면 exit
         driver = self.set_path()
-        self.set_path()
+
         self.ary_clear()
         driver.get(url)
         driver.implicitly_wait(10)
