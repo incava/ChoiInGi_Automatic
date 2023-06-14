@@ -1,4 +1,5 @@
-# ChoiInGi_Automatic
+# Coupang_AutoMatic
+
 
 # 파이썬 자동화
 
