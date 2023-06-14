@@ -27,4 +27,6 @@ url입력창 : 원하는 파싱 사이트를 입력. 기본 값은 쿠팡.
 
 ## 실행 영상
 
-## 실행 결과 csv
+
+https://github.com/incava/ChoiInGi_Automatic/assets/68988975/20cb2672-8030-49ae-b2e1-2b4a55b955b3
+
