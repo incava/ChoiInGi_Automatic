@@ -93,8 +93,8 @@ class WindowUI(tk.Tk):
         result = self.auto.auto_start(self.url, self.search_name, self.min_price, self.max_price, self.filter_array)
         # 매크로 실행 결과 출력
         print(result)
-        if result == 'success':
-            result = self.save_to_csv()
+        if result == 'success' or 'exit':
+            result = self.save_to_csv()        
         print(result)
 
     def thread_control(self, value):
